@@ -20,18 +20,22 @@ export default function ThemeProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [mode, setMode] = useState("");
+  const [mode, setMode] = useState("light");
   const handleThemeChange = useCallback(() => {
-    if (mode === "dark") {
-      setMode("light");
-      document.documentElement.classList.add("light");
-    } else {
+    if (
+      localStorage.theme === "dark" ||
+      (!("theme" in localStorage) &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    ) {
       setMode("dark");
       document.documentElement.classList.add("dark");
+    } else {
+      setMode("light");
+      document.documentElement.classList.remove("dark");
     }
-  }, [mode]);
+  }, []);
 
-  useEffect(handleThemeChange, [mode, handleThemeChange]);
+  useEffect(handleThemeChange, [handleThemeChange, mode]);
   return (
     <ThemeContext.Provider value={{ mode, setMode }}>
       {children}
