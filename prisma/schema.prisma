@@ -7,3 +7,87 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id               String           @id @default(auto()) @map("_id") @db.ObjectId
+  clerkId          String
+  name             String
+  username         String
+  email            String
+  password         String?
+  bio              String?
+  picture          String
+  location         String
+  portfolioWebsite String?
+  reputation       Int              @default(0)
+  questions        Question[]       @relation("UserQuestions")
+  answers          Answer[]
+  followedTags     FollowedTags[]
+  savedQuestions   SavedQuestions[]
+  questionVotes    QuestionVotes[]
+  joinedAt         DateTime         @default(now())
+}
+
+model Question {
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String
+  tags      TagsOnQuestions[]
+  views     Int               @default(0)
+  author    User              @relation(name: "UserQuestions", fields: [authorId], references: [id])
+  authorId  String            @db.ObjectId
+  answers   Answer[]
+  savedBy   SavedQuestions[]
+  votes     QuestionVotes[]
+  createdAt DateTime          @default(now())
+}
+
+model Tag {
+  id          String            @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  description String
+  questions   TagsOnQuestions[]
+  followers   FollowedTags[]
+  createdOn   DateTime          @default(now())
+}
+
+model Answer {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  content    String
+  author     User     @relation(fields: [authorId], references: [id])
+  authorId   String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String   @db.ObjectId
+}
+
+model FollowedTags {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @db.ObjectId
+  tag    Tag    @relation(fields: [tagId], references: [id])
+  tagId  String @db.ObjectId
+}
+
+model TagsOnQuestions {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String   @db.ObjectId
+  tag        Tag      @relation(fields: [tagId], references: [id])
+  tagId      String   @db.ObjectId
+}
+
+model SavedQuestions {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String   @db.ObjectId
+}
+
+model QuestionVotes {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String   @db.ObjectId
+  question   Question @relation(fields: [questionId], references: [id])
+  questionId String   @db.ObjectId
+  isUpvote   Boolean // true for upvote, false for downvote
+}
