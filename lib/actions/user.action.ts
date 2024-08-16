@@ -41,8 +41,8 @@ export async function createUser(userData: CreateUserParams) {
 export async function updateUser(params: UpdateUserParams) {
     try {
         await connectToDatabase();
-        const { clerkId, updatedData, path } = params;
-        await User.findOneAndUpdate({ clerkId }, updatedData, { new: true });
+        const { clerkId, updateData, path } = params;
+        await User.findOneAndUpdate({ clerkId }, updateData, { new: true });
         revalidatePath(path);
 
     } catch (error) {
