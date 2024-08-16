@@ -5,13 +5,11 @@ export interface IQuestion extends Document {
     content: string;
     tags: Schema.Types.ObjectId[];
     views: number;
-    likes: number;
     upvotes: Schema.Types.ObjectId[];
     downvotes: Schema.Types.ObjectId[];
     author: Schema.Types.ObjectId;
     answers: Schema.Types.ObjectId[];
     createdAt: Date;
-
 }
 
 const QuestionSchema = new Schema({
@@ -23,9 +21,9 @@ const QuestionSchema = new Schema({
     downvotes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     author: { type: Schema.Types.ObjectId, ref: 'User' },
     answers: [{ type: Schema.Types.ObjectId, ref: 'Answer' }],
-    createdAt: { type: Date, default: Date.now },
-});
+    createdAt: { type: Date, default: Date.now }
+})
 
-const Question = models.Question || model('Question', QuestionSchema)
+const Question = models.Question || model('Question', QuestionSchema);
 
 export default Question;
