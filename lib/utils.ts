@@ -5,29 +5,44 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const getTimeStamp = (createdAt: Date): string => {
-  const now = new Date();
-  const seconds = Math.floor((now.getTime() - createdAt.getTime()) / 1000);
+export function getTimeStamp(mongoDate: Date | string, locales = 'en-US') {
+  // Convert to the client's local timezone
+  const localDate = new Intl.DateTimeFormat(locales, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  }).format(new Date(mongoDate));
 
-  const intervals = [
-    { label: 'year', seconds: 31536000 },
-    { label: 'month', seconds: 2592000 },
-    { label: 'week', seconds: 604800 },
-    { label: 'day', seconds: 86400 },
-    { label: 'hour', seconds: 3600 },
-    { label: 'minute', seconds: 60 },
-    { label: 'second', seconds: 1 }
+  // Parse the local date back to a Date object
+  const now = new Date();
+  const localTime = new Date(localDate);
+  const diffInSeconds = Math.floor((now.getTime() - localTime.getTime()) / 1000);
+
+  const units = [
+    { name: 'year', value: 60 * 60 * 24 * 365 },
+    { name: 'month', value: 60 * 60 * 24 * 30 },
+    { name: 'week', value: 60 * 60 * 24 * 7 },
+    { name: 'day', value: 60 * 60 * 24 },
+    { name: 'hour', value: 60 * 60 },
+    { name: 'minute', value: 60 },
+    { name: 'second', value: 1 },
   ];
 
-  for (const interval of intervals) {
-    const count = Math.floor(seconds / interval.seconds);
-    if (count >= 1) {
-      return `${count} ${interval.label}${count !== 1 ? 's' : ''} ago`;
+  for (const unit of units) {
+    const value = Math.floor(diffInSeconds / unit.value);
+    if (value >= 1) {
+      return new Intl.RelativeTimeFormat(locales, { numeric: 'auto' }).format(-value, unit.name as Intl.RelativeTimeFormatUnit);
     }
   }
 
   return 'just now';
 }
+
+
 
 export const formatNumber = (number: number): string => {
   if (number >= 1_000_000) {
